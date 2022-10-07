@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  selenium:
+    container_name: datacats-selenium
+    image: selenium/standalone-firefox
+    restart: always
+    shm_size: "2gb"  # Required < tmpfs
+
+  db:
+    container_name: datacats-psql
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: ${DATACATS_PSQL_PASS}
+      POSTGRES_DB: datacats
+    volumes:
+      - ./docker/postgres-testing:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: datacats_pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${DATACATS_PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${DATACATS_PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_ADDRESS: 0.0.0.0
+    volumes:
+      - ./docker/pgadmin-testing:/var/lib/pgadmin
+    ports:
+      - "4534:80"
