@@ -4,8 +4,6 @@ import logging                    # Logging important events
 from dotenv import load_dotenv    # Load environment variables from .env
 from db.alchemy import DB         # Connect to db
 from newsparser import RBCParser  # www.rbc.ru parser
-# Security
-#from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # region Logging
 # Create a logger instance

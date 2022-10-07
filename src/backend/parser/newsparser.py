@@ -66,14 +66,6 @@ class RBCParser:
         data = soup.findAll("a", {"class": "item__link"})
 
         # Placeholder for articles
-        # Format:
-        # {
-            # "<ArticleID>": {
-                # "title": "<Foo Bar fizz bazz>",
-                # "preamble": "<Some intro text about Bar>",
-                # "tldr": "<Short description of foo event>"
-            # }
-        # }
         articles = {}
 
         for news in data:
