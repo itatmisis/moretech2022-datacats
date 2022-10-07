@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+venv/
+
+# Docker
+pgadmin/
+postgres/
+
+# Secrets
+.env
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
