@@ -1,0 +1,16 @@
+# Global
+python_dotenv
+
+requests        # HTTP requests
+beautifulsoup4  # HTML parsing
+selenium        # Interactive page parsing
+
+# API
+fastapi         # API
+uvicorn         # FastAPI dependency (neeeds to be in PATH)
+                # `uvicorn api:app --reload`
+
+# DB
+sqlalchemy
+sqlalchemy_utils
+psycopg2-binary

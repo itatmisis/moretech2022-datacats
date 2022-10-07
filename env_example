@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+# shellcheck disable=SC2034
+
+DATACATS_LOGGING_LEVEL=debug
+#DATACATS_API_PASSWORD=abcde
+
+DATACATS_PGADMIN_PASSWORD=qwerty54321
+DATACATS_PGADMIN_EMAIL=datacats.mi@sos.org
+
+DATACATS_PSQL_USER=root
+DATACATS_PSQL_PASS=qwerty12345
+DATACATS_PSQL_HOST=db              # Host in docker-compose
+DATACATS_PSQL_PORT=5432
+
+DATACATS_SELENIUM_DOMAIN=selenium  # Host in docker-compose
+DATACATS_SELENIUM_PORT=4444
