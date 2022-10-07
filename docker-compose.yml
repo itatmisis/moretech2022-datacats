@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: ${DATACATS_PSQL_PASS}
       POSTGRES_DB: datacats
     volumes:
-      - ./docker/postgres-testing:/var/lib/postgresql/data
+      - ./docker/postgres:/var/lib/postgresql/data
 
   pgadmin:
     container_name: datacats_pgadmin
@@ -27,15 +27,36 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${DATACATS_PGADMIN_PASSWORD}
       PGADMIN_LISTEN_ADDRESS: 0.0.0.0
     volumes:
-      - ./docker/pgadmin-testing:/var/lib/pgadmin
+      - ./docker/pgadmin:/var/lib/pgadmin
     ports:
-      - "4534:80"
+      - "23434:80"
 
-  backend:
-    container_name: datacats-backend
+  backend-api:
+    container_name: datacats-backend-api
     build:
       context: ./src/backend
-    image: moretech2022-datacats-backend
+      dockerfile: ./Dockerfile.api
+    image: moretech2022-datacats-backend-api
+    restart: always
+    environment:  #DATACATS_API_PASSWORD: abcde is not implemented
+      DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
+      DATACATS_PSQL_USER: ${DATACATS_PSQL_USER}
+      DATACATS_PSQL_PASS: ${DATACATS_PSQL_PASS}
+      DATACATS_PSQL_HOST: ${DATACATS_PSQL_HOST}
+      DATACATS_PSQL_PORT: ${DATACATS_PSQL_PORT}
+    volumes:
+      - ./docker/backend:/data
+    ports:
+      - "23432:80"
+    depends_on:
+      - db
+
+  backend-parser:
+    container_name: datacats-backend-parser
+    build:
+      context: ./src/backend
+      dockerfile: ./Dockerfile.parser
+    image: moretech2022-datacats-backend-parser
     restart: always
     environment:  #DATACATS_API_PASSWORD: abcde is not implemented
       DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
@@ -46,9 +67,8 @@ services:
       DATACATS_SELENIUM_DOMAIN: ${DATACATS_SELENIUM_DOMAIN}
       DATACATS_SELENIUM_PORT: ${DATACATS_SELENIUM_PORT}
     volumes:
-      - ./docker/backend-testing:/data
+      - ./docker/backend:/data
     ports:
-      - "23432:80"
+      - "23433:80"
     depends_on:
       - db
-      - selenium

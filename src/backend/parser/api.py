@@ -2,14 +2,14 @@ from os import getenv             # Interact with environment variables
 from fastapi import FastAPI       # Main API
 import logging                    # Logging important events
 from dotenv import load_dotenv    # Load environment variables from .env
-from db import DB                 # Connect to db
+from db.alchemy import DB         # Connect to db
 from newsparser import RBCParser  # www.rbc.ru parser
 # Security
 #from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # region Logging
 # Create a logger instance
-log = logging.getLogger('datacats-backend')
+log = logging.getLogger('datacats-backend-parsers')
 # Create log formatter
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -35,9 +35,9 @@ if not DOCKER_MODE:
 
 # Create file logging handler and set its level
 if DOCKER_MODE:
-    logfile_path = r"/data/datacats-moretech.log"
+    logfile_path = r"/data/datacats-moretech-backend-parser.log"
 else:
-    logfile_path = r"datacats-moretech.log"
+    logfile_path = r"datacats-moretech-backend-parser.log"
 fh = logging.FileHandler(logfile_path)
 fh.setFormatter(formatter)
 log.addHandler(fh)
@@ -85,63 +85,17 @@ log.debug("RBCParser is up")
 app = FastAPI()
 log.debug("FastAPI is up")
 
-# FastAPI authentication
-#! OH NO! It's insecure!
-
 @app.get("/")
 async def root():
     return {"message": "It's alive!"}
     log.debug("FastAPI: A user requested /")
 
-@app.get("/stats")
-async def get_stats():
-    log.debug("FastAPI: A user requested /stats")
-    return db.get_stats()
-
-@app.get("/sources")
-async def get_sources():
-    log.debug("FastAPI: A user requested /sources")
-    return {}
-
-@app.get("/articles")
-async def get_article_list():
-    log.debug("FastAPI: A user requested /articles")
-    return db.get_ids()
-
-@app.get("/articles/all")
-async def get_all_articles():
-    log.debug("FastAPI: A user requested /articles/all")
-    return db.get_all_articles()
-
-@app.get("/articles/all/meta")
-async def get_all_articles_meta():
-    log.debug("FastAPI: A user requested /articles/all/meta")
-    return db.get_all_articles_meta()
-
-@app.get("/articles/all/body")
-async def get_all_articles_body():
-    log.debug("FastAPI: A user requested /articles/all/body")
-    return db.get_all_articles_body()
-
-@app.get("/article/{article_id}")
-async def get_article(article_id):
-    log.debug(f"FastAPI: A user requested /article/{article_id}")
-    return db.get_article(article_id)
-
-@app.get("/article/{article_id}/meta")
-async def get_article_meta(article_id):
-    log.debug(f"FastAPI: A user requested /article/{article_id}/meta")
-    return db.get_article_meta(article_id)
-
-@app.get("/article/{article_id}/body")
-async def get_article_body(article_id):
-    log.debug(f"FastAPI: A user requested /article/{article_id}/body")
-    return {"body": db.get_article_body(article_id)}
-
-@app.post("/articles/fetch/{topic}")
+# TODO: Replace with a scheduler
+@app.post("/articles/fetch/{topic}")  #! Parser is in another docker container!
 async def fetch_articles(topic):
-    if rbc.fetch(topic):
-        log.debug(f"FastAPI: A user requested /articles/fetch/{topic}")
-        return {"fetched": True, "reason": None, "target": topic}
-    log.debug(f"FastAPI: A user requested /articles/fetch/{topic}; another request is in progress, aborting")
-    return {"fetched": False, "reason": "fetch_in_progress", "target": topic}
+    if rbc.is_fetching():
+        log.debug(f"FastAPI: A user requested /articles/fetch/{topic}; another request is in progress, aborting")
+        return {"fetched": False, "reason": "fetch_in_progress", "target": topic}
+    log.debug(f"FastAPI: A user requested /articles/fetch/{topic}")
+    rbc.fetch(topic)
+    return {"fetched": True, "reason": None, "target": topic}

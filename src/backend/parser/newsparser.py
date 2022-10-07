@@ -1,8 +1,8 @@
-from time import sleep
-import requests as r
-from bs4 import BeautifulSoup as bs
+from time import sleep               # Handle DB connection failures
+import requests as r                 # Request HTML
+from bs4 import BeautifulSoup as bs  # Parse HTML
 from selenium import webdriver
-from db import DB
+from db.alchemy import DB            # Connect to db
 from selenium.common.exceptions import WebDriverException
 
 class RBCParser:
@@ -16,6 +16,11 @@ class RBCParser:
         self.selenium_domain = selenium_domain
         self.selenium_port = selenium_port
         self.fetching = False
+
+    def is_fetching(self) -> bool:
+        if self.fetching:
+            return True
+        return False
 
     def fetch(self, topic: str) -> bool:
         # If already fetching, quit

@@ -1,6 +1,7 @@
 # Global
 python_dotenv
 
+# Parser
 requests        # HTTP requests
 beautifulsoup4  # HTML parsing
 selenium        # Interactive page parsing

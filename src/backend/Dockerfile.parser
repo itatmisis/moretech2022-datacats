@@ -7,14 +7,14 @@ ENV DOCKER_MODE="true"
 WORKDIR /app
 
 # Copy dependency list and install the packages
-COPY requirements.txt ./
+COPY ./parser/requirements.txt ./
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
 # Bundle source files
-COPY models/ ./models
-COPY db.py ./
-COPY api.py ./
-COPY newsparser.py ./
+COPY ./db/models/ ./models
+COPY ./db/ ./db
+COPY ./parser/api.py ./
+COPY ./parser/newsparser.py ./
 
 # Create data mountpoint
 RUN mkdir /data
