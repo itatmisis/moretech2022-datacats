@@ -1,6 +1,6 @@
-# More.Tech 2022 Datacats Backend
+# MORE.Tech 2022 Datacats
 
-## It (somewhat) works! I guess
+## It works!
 
 ## Quick start (Docker)
 
@@ -12,7 +12,9 @@ Audit logs with `docker compose logs [-f] [service-name]`.
 
 ## Quick start (without Docker)
 
-Start all required services (PostgreSQL, Selenium) and write your `.env` file to `/src` (example: `/env_example`).
+Start all required services (PostgreSQL, Selenium).
+
+Write your `.env` file to `/src` (example: `/env_example`).
 
 Run `/setup/no-docker.sh` from this repository's root (`./setup/no-docker.sh`)
 If you run into a permission error, execute `chmod u+x ./setup/no-docker.sh`
