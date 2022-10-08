@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup as bs  # Parse HTML
 from selenium import webdriver
 from db.alchemy import DB            # Connect to db
 from selenium.common.exceptions import WebDriverException
+from time import mktime
+from datetime import datetime
 
 class RBCParser:
     def __init__(self, logger, scroll_cooldown, selenium_domain, selenium_port, db_creds):
@@ -88,10 +90,8 @@ class RBCParser:
             except:
                 tldr = None      # Also sadness
 
-            # [DEBUG] Print article metadata
-            # print("TITLE:", title)
-            # print("PREAMBLE:", preamble)
-            # print("TLDR:", tldr)
+            # Collect timestamp
+            timestamp = datetime.strptime(ndata.find("time", {"class": "article__header__date"})["datetime"].split("+")[0], "%Y-%m-%dT%H:%M:%S")
 
             # Parse all paragraphs
             paragraphs_raw = ndata.findAll("p")  # All (incl. empty and generally crappy) paragraphs
@@ -128,6 +128,7 @@ class RBCParser:
                        "title": title,
                        "preamble": preamble,
                        "tldr": tldr,
+                       "timestamp": timestamp,
                        "body": body}
 
             # Add the atricle to articles
@@ -159,7 +160,7 @@ if __name__ == "__main__":
                 "host": getenv("DATACATS_PSQL_HOST"),
                 "port": getenv("DATACATS_PSQL_PORT")}
     rbc = RBCParser(None,
-                    2,
+                    0.7,
                     getenv("DATACATS_SELENIUM_DOMAIN"),
                     getenv("DATACATS_SELENIUM_PORT"),
                     db_creds)

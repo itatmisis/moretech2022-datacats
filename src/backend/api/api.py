@@ -127,6 +127,6 @@ async def get_article_body(article_id):
     log.debug(f"FastAPI: A user requested /article/{article_id}/body")
     return {"body": db.get_article_body(article_id)}
 
-@app.post("/articles/fetch/{topic}")  #! Parser is in another Docker container!
-async def fetch_articles(topic):
-    pass
+# @app.post("/articles/fetch/{topic}")  #! Parser is in another Docker container!
+# async def fetch_articles(topic):
+#     pass

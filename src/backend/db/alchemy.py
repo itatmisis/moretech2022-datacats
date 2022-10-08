@@ -5,8 +5,9 @@ from sqlalchemy import func
 from sqlalchemy_utils import database_exists, create_database
 from typing import List, Union
 from sqlalchemy import text
+from time import mktime
 # Models
-from models.article import Base, Article
+from db.models.article import Base, Article
 # Error handling
 from time import sleep
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
@@ -62,6 +63,7 @@ class DB:
                               title=article_data["title"],
                               preamble=article_data["preamble"],
                               tldr=article_data["tldr"],
+                              timestamp=article_data["timestamp"],
                               body=article_data["body"])
             self.session.add(article)
             self.session.commit()
@@ -84,7 +86,7 @@ class DB:
         return self.session.query(Article).get(article_id).as_dict()
 
     def get_all_articles(self) -> dict:
-        articles_raw = self.session.execute(text("SELECT id, source, topic, title, preamble, tldr, body FROM articles")).all()
+        articles_raw = self.session.execute(text("SELECT id, source, topic, title, preamble, tldr, timestamp, body FROM articles")).all()
         articles = {}
         for article in articles_raw:
             articles[article[0]] = {"source": article[1],
@@ -92,17 +94,20 @@ class DB:
                                     "title": article[3],
                                     "preamble": article[4],
                                     "tldr": article[5],
-                                    "body": article[6]}
+                                    "timestamp": int(mktime(article[6].timetuple())),
+                                    "body": article[7]}  # timestamp is returned as UTC UNIX Time
         return articles
 
     def get_all_articles_meta(self) -> dict:
-        articles_raw = self.session.execute(text("SELECT id, source, topic, title, preamble, tldr FROM articles")).all()
+        articles_raw = self.session.execute(text("SELECT id, source, topic, title, preamble, tldr, timestamp FROM articles")).all()
         articles = {}
         for article in articles_raw:
             articles[article[0]] = {"source": article[1],
-                                   "title": article[2],
-                                   "preamble": article[3],
-                                   "tldr": article[4]}
+                                    "topic": article[2],
+                                    "title": article[3],
+                                    "preamble": article[4],
+                                    "tldr": article[5],
+                                    "timestamp": int(mktime(article[6].timetuple()))}
         return articles
 
     def get_all_articles_body(self) -> dict:
@@ -116,12 +121,13 @@ class DB:
         return self.session.query(Article).get(article_id).body
 
     def get_article_meta(self, article_id: str) -> dict:
-        article_raw = self.session.execute(text(f"SELECT source, topic, title, preamble, tldr FROM articles WHERE id = '{article_id}'")).first()
+        article_raw = self.session.execute(text(f"SELECT source, topic, title, preamble, tldr, timestamp FROM articles WHERE id = '{article_id}'")).first()
         return {"source": article_raw[0],
                 "topic": article_raw[1],
                 "title": article_raw[2],
                 "preamble": article_raw[3],
-                "tldr": article_raw[4]}
+                "tldr": article_raw[4],
+                "timestamp": int(mktime(article[5].timetuple()))}
 
 if __name__ == "__main__":
     from os import getenv

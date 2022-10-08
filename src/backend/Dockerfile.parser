@@ -11,7 +11,6 @@ COPY ./parser/requirements.txt ./
 RUN pip3 install --no-cache-dir --upgrade -r requirements.txt
 
 # Bundle source files
-COPY ./db/models/ ./models
 COPY ./db/ ./db
 COPY ./parser/api.py ./
 COPY ./parser/newsparser.py ./
