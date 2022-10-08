@@ -1,16 +1,18 @@
 version: '3'
 
 services:
-  selenium:
+  selenium-testing:
     container_name: datacats-selenium-testing
     image: selenium/standalone-firefox
     restart: always
+    environment:
+      SE_NODE_MAX_SESSIONS: 5
     ports:
       - "23436:4444"  # API and web UI
       - "7900:7900"  # VNC
     shm_size: "2gb"  # Required < tmpfs
 
-  db:
+  db-testing:
     container_name: datacats-psql-testing
     image: postgres
     restart: always
@@ -23,7 +25,7 @@ services:
     ports:
       - "23443:5432"
 
-  pgadmin:
+  pgadmin-testing:
     container_name: datacats_pgadmin-testing
     image: dpage/pgadmin4
     restart: always
@@ -36,7 +38,7 @@ services:
     ports:
       - "23442:80"
 
-  backend-api:
+  backend-api-testing:
     container_name: datacats-backend-api-testing
     build:
       context: ./src/backend
@@ -56,7 +58,7 @@ services:
     depends_on:
       - db
 
-  backend-parser:
+  backend-parser-testing:
     container_name: datacats-backend-parser-testing
     build:
       context: ./src/backend
