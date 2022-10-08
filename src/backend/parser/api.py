@@ -4,7 +4,7 @@ from fastapi import BackgroundTasks  # Send response before task termination (0)
 import logging                       # Logging important events
 from dotenv import load_dotenv       # Load environment variables from .env
 from db.alchemy import DB            # Connect to db
-from newsparser import RBCParser     # www.rbc.ru parser
+from newsparser import RBCParser, RiaParser
 
 # region Logging
 # Create a logger instance
@@ -74,11 +74,15 @@ log.debug("API DB connection is up")
 
 # Create parser instances
 rbc = RBCParser(log,
-                0.7,
                 getenv("DATACATS_SELENIUM_DOMAIN"),
                 getenv("DATACATS_SELENIUM_PORT"),
                 db_creds)
 log.debug("RBCParser is up")
+
+ria = RiaParser(log,
+                getenv("DATACATS_SELENIUM_DOMAIN"),
+                getenv("DATACATS_SELENIUM_PORT"),
+                db_creds)
 
 # Create FastAPI app
 app = FastAPI()
@@ -90,11 +94,15 @@ async def root():
     log.debug("FastAPI: A user requested /")
 
 # TODO: Replace with a scheduler
-@app.post("/articles/fetch/{topic}")
-async def fetch_articles(topic: str, background_tasks: BackgroundTasks):
-    if rbc.is_fetching():
+@app.post("/articles/fetch/{publisher}/{topic}")
+async def fetch_articles(publisher: str, topic: str, background_tasks: BackgroundTasks):
+    if publisher == "rbc":
+        pub = rbc
+    elif publisher == "ria":
+        pub = ria
+    if pub.is_fetching():
         log.debug(f"FastAPI: A user requested /articles/fetch/{topic}; another request is in progress, aborting")
         return {"fetching": False, "reason": "fetch_in_progress", "target": topic}
-    log.debug(f"FastAPI: A user requested /articles/fetch/{topic}")
-    rbc.fetch(topic)  # TODO: Add to background tasks (gives an error TypeError: 'NoneType' object is not callable?)
+    log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}")
+    pub.fetch(topic)  # TODO: Add to background tasks (gives an error TypeError: 'NoneType' object is not callable?)
     return {"fetching": True, "reason": None, "target": topic}

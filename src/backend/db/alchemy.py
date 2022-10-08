@@ -6,8 +6,15 @@ from sqlalchemy_utils import database_exists, create_database
 from typing import List, Union
 from sqlalchemy import text
 from time import mktime
+
 # Models
-from db.models.article import Base, Article
+from os import getenv
+from dotenv import load_dotenv
+load_dotenv()
+if getenv("DOCKER_MODE") != "true":
+    from models.article import Base, Article
+else:
+    from db.models.article import Base, Article
 # Error handling
 from time import sleep
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
@@ -83,7 +90,9 @@ class DB:
         return self.session.query(Article).get(article_id).title
 
     def get_article(self, article_id: str) -> dict:
-        return self.session.query(Article).get(article_id).as_dict()
+        article = self.session.query(Article).get(article_id).as_dict()
+        article["timestamp"] = int(mktime(article["timestamp"].timetuple()))
+        return article
 
     def get_all_articles(self) -> dict:
         articles_raw = self.session.execute(text("SELECT id, source, topic, title, preamble, tldr, timestamp, body FROM articles")).all()
@@ -140,4 +149,5 @@ if __name__ == "__main__":
     db = DB(db_creds)
     #print(db.get_ids_by_source("rbc-technology_and_media"))
     #!print(db.get_meta('631acf519a79476d2fe21e12'))
-    print(db.get_all_articles())
+    #print(db.get_all_articles())
+    print(db.get_article("ria-yandeks-1816257822"))

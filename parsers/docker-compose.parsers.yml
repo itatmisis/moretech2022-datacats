@@ -1,0 +1,95 @@
+version: '3'
+
+services:
+  backend-mass-selenium-instance:
+    container_name: datacats-selenium-testing
+    image: selenium/standalone-firefox
+    restart: always
+    environment:
+      SE_NODE_MAX_SESSIONS: 5
+    ports:
+      - "6669:4444"  # API and web UI
+      - "7900:7900"  # VNC
+    networks:
+      - datacats-network
+    shm_size: "2gb"  # Required < tmpfs
+
+  backend-parser-instance0:
+    container_name: datacats-backend-parser-instance0
+    image: moretech2022-datacats-backend-parser
+    restart: always
+    environment:  #DATACATS_API_PASSWORD: abcde is not implemented
+      DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
+      DATACATS_PSQL_USER: ${DATACATS_PSQL_USER}
+      DATACATS_PSQL_PASS: ${DATACATS_PSQL_PASS}
+      DATACATS_PSQL_HOST: ${DATACATS_PSQL_HOST}
+      DATACATS_PSQL_PORT: ${DATACATS_PSQL_PORT}
+      DATACATS_SELENIUM_DOMAIN: ${DATACATS_SELENIUM_DOMAIN}
+      DATACATS_SELENIUM_PORT: ${DATACATS_SELENIUM_PORT}
+    ports:
+      - "20550:80"  # Persist until a scheduler is live
+    networks:
+      - datacats-network
+    depends_on:
+      - db
+
+  backend-parser-instance1:
+    container_name: datacats-backend-parser-instance1
+    image: moretech2022-datacats-backend-parser
+    restart: always
+    environment:  #DATACATS_API_PASSWORD: abcde is not implemented
+      DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
+      DATACATS_PSQL_USER: ${DATACATS_PSQL_USER}
+      DATACATS_PSQL_PASS: ${DATACATS_PSQL_PASS}
+      DATACATS_PSQL_HOST: ${DATACATS_PSQL_HOST}
+      DATACATS_PSQL_PORT: ${DATACATS_PSQL_PORT}
+      DATACATS_SELENIUM_DOMAIN: ${DATACATS_SELENIUM_DOMAIN}
+      DATACATS_SELENIUM_PORT: ${DATACATS_SELENIUM_PORT}
+    ports:
+      - "20551:80"  # Persist until a scheduler is live
+    networks:
+      - datacats-network
+    depends_on:
+      - db
+
+  backend-parser-instance2:
+    container_name: datacats-backend-parser-instance2
+    image: moretech2022-datacats-backend-parser
+    restart: always
+    environment:  #DATACATS_API_PASSWORD: abcde is not implemented
+      DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
+      DATACATS_PSQL_USER: ${DATACATS_PSQL_USER}
+      DATACATS_PSQL_PASS: ${DATACATS_PSQL_PASS}
+      DATACATS_PSQL_HOST: ${DATACATS_PSQL_HOST}
+      DATACATS_PSQL_PORT: ${DATACATS_PSQL_PORT}
+      DATACATS_SELENIUM_DOMAIN: ${DATACATS_SELENIUM_DOMAIN}
+      DATACATS_SELENIUM_PORT: ${DATACATS_SELENIUM_PORT}
+    ports:
+      - "20552:80"  # Persist until a scheduler is live
+    networks:
+      - datacats-network
+    depends_on:
+      - db
+
+  backend-parser-instance3:
+    container_name: datacats-backend-parser-instance3
+    image: moretech2022-datacats-backend-parser
+    restart: always
+    environment:  #DATACATS_API_PASSWORD: abcde is not implemented
+      DATACATS_LOGGING_LEVEL: ${DATACATS_LOGGING_LEVEL}
+      DATACATS_PSQL_USER: ${DATACATS_PSQL_USER}
+      DATACATS_PSQL_PASS: ${DATACATS_PSQL_PASS}
+      DATACATS_PSQL_HOST: ${DATACATS_PSQL_HOST}
+      DATACATS_PSQL_PORT: ${DATACATS_PSQL_PORT}
+      DATACATS_SELENIUM_DOMAIN: ${DATACATS_SELENIUM_DOMAIN}
+      DATACATS_SELENIUM_PORT: ${DATACATS_SELENIUM_PORT}
+    ports:
+      - "20553:80"  # Persist until a scheduler is live
+    networks:
+      - datacats-network
+    depends_on:
+      - db
+
+networks:
+  datacats-network:
+    name: datacats-network

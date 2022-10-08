@@ -9,7 +9,7 @@ class Article(Base):
     """Article model for PostgreSQL"""
     __tablename__ = "articles"
     id = Column(Text, primary_key=True)
-    source = Column(Text)  # rbc, ...
+    source = Column(Text)
     topic = Column(Text)
     title = Column(Text)
     preamble = Column(Text)

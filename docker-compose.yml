@@ -6,6 +6,8 @@ services:
     image: selenium/standalone-firefox
     restart: always
     shm_size: "2gb"  # Required < tmpfs
+    networks:
+      - datacats-network
 
   db:
     container_name: datacats-psql
@@ -19,6 +21,8 @@ services:
       - ./docker/postgres:/var/lib/postgresql/data
     ports:
       - "6961:5432"  #! Testing only!
+    networks:
+      - datacats-network
 
   pgadmin:
     container_name: datacats_pgadmin
@@ -32,6 +36,8 @@ services:
       - ./docker/pgadmin:/var/lib/pgadmin
     ports:
       - "23434:80"
+    networks:
+      - datacats-network
 
   backend-api:
     container_name: datacats-backend-api
@@ -50,6 +56,8 @@ services:
       - ./docker/backend:/data
     ports:
       - "23432:80"
+    networks:
+      - datacats-network
     depends_on:
       - db
 
@@ -72,5 +80,11 @@ services:
       - ./docker/backend:/data
     ports:
       - "23433:80"  # Persist until a scheduler is live
+    networks:
+      - datacats-network
     depends_on:
       - db
+
+networks:
+  datacats-network:
+    name: datacats-network
