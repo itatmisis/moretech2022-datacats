@@ -3,8 +3,7 @@ __pycache__/
 venv/
 
 # Docker
-pgadmin/
-postgres/
+docker/
 
 # Secrets
 .env
