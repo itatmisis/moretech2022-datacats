@@ -404,9 +404,6 @@ class RBCParser:
                 # Else, include the paragraph
                 paragraphs.append(stripped_paragraph)
 
-            # [DEBUG] Print all paragraphs one by one
-            #for par in paragraphs: print("PARAGRAPH:", par)
-
             # Construct the article's body from paragraphs (pr's may be used later!)
             body = ""
             for par in paragraphs:
@@ -427,9 +424,6 @@ class RBCParser:
 
             # Add the atricle to articles
             articles[news_link.split("/")[-1]] = article
-
-            # [DEBUG] Print the article's body
-            #print(body)
 
             # Send article to db
             self.db.add_article(news_link.split("/")[-1], article)
