@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Article model for SQLAlchemy"""
 from datetime import datetime
 from sqlalchemy import Column, BigInteger, Boolean, Text, Date, DateTime

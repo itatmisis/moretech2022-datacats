@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from datetime import datetime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine

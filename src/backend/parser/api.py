@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from os import getenv                # Interact with environment variables
 from fastapi import FastAPI          # Main API
 from fastapi import BackgroundTasks  # Send response before task termination (0)

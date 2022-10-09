@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from time import sleep               # Handle DB connection failures
 import requests as r                 # Request HTML
 from bs4 import BeautifulSoup as bs  # Parse HTML

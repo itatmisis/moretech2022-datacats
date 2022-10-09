@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from os import getenv             # Interact with environment variables
 from fastapi import FastAPI       # Main API
 import logging                    # Logging important events
