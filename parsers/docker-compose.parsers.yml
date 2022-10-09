@@ -2,14 +2,14 @@ version: '3'
 
 services:
   backend-mass-selenium-instance:
-    container_name: datacats-selenium-testing
+    container_name: datacats-selenium-parsers
     image: selenium/standalone-firefox
     restart: always
     environment:
       SE_NODE_MAX_SESSIONS: 5
     ports:
       - "6669:4444"  # API and web UI
-      - "7900:7900"  # VNC
+      - "7901:7900"  # VNC
     networks:
       - datacats-network
     shm_size: "2gb"  # Required < tmpfs

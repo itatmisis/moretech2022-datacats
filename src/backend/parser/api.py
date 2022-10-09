@@ -4,7 +4,7 @@ from fastapi import BackgroundTasks  # Send response before task termination (0)
 import logging                       # Logging important events
 from dotenv import load_dotenv       # Load environment variables from .env
 from db.alchemy import DB            # Connect to db
-from newsparser import RBCParser, RiaParser
+from newsparser import RiaParser, InvestingParser, RBCParser
 
 # region Logging
 # Create a logger instance
@@ -77,12 +77,19 @@ rbc = RBCParser(log,
                 getenv("DATACATS_SELENIUM_DOMAIN"),
                 getenv("DATACATS_SELENIUM_PORT"),
                 db_creds)
-log.debug("RBCParser is up")
+log.info("RBCParser is up")
 
 ria = RiaParser(log,
                 getenv("DATACATS_SELENIUM_DOMAIN"),
                 getenv("DATACATS_SELENIUM_PORT"),
                 db_creds)
+log.info("RiaParser is up")
+
+investing = InvestingParser(log,
+                            getenv("DATACATS_SELENIUM_DOMAIN"),
+                            getenv("DATACATS_SELENIUM_PORT"),
+                            db_creds)
+log.info("InvestingParser is up")
 
 # Create FastAPI app
 app = FastAPI()
@@ -95,14 +102,37 @@ async def root():
 
 # TODO: Replace with a scheduler
 @app.post("/articles/fetch/{publisher}/{topic}")
-async def fetch_articles(publisher: str, topic: str, background_tasks: BackgroundTasks):
+async def fetch_articles(publisher: str, topic: str):
     if publisher == "rbc":
         pub = rbc
     elif publisher == "ria":
         pub = ria
     if pub.is_fetching():
-        log.debug(f"FastAPI: A user requested /articles/fetch/{topic}; another request is in progress, aborting")
+        log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}; another request is in progress, aborting")
         return {"fetching": False, "reason": "fetch_in_progress", "target": topic}
     log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}")
     pub.fetch(topic)  # TODO: Add to background tasks (gives an error TypeError: 'NoneType' object is not callable?)
+    return {"fetching": True, "reason": None, "target": topic}
+
+
+@app.post("/articles/fetch/{publisher}/{topic}/{pages}")
+async def fetch_articles_with_pages(publisher: str, topic: str, pages: str, background_tasks: BackgroundTasks):
+    if publisher == "investing":
+        pub = investing
+    if pub.is_fetching():
+        log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}/{pages}; another request is in progress, aborting")
+        return {"fetching": False, "reason": "fetch_in_progress", "target": topic}
+    log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}/{pages}")
+    pub.fetch(topic, pages=int(pages))
+    return {"fetching": True, "reason": None, "target": topic}
+
+@app.post("/articles/fetch/{publisher}/{topic}/{pages}/{start_page}")
+async def fetch_articles_with_pages(publisher: str, topic: str, pages: str, start_page: str, background_tasks: BackgroundTasks):
+    if publisher == "investing":
+        pub = investing
+    if pub.is_fetching():
+        log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}/{pages}/{start_page}; another request is in progress, aborting")
+        return {"fetching": False, "reason": "fetch_in_progress", "target": topic}
+    log.debug(f"FastAPI: A user requested /articles/fetch/{publisher}/{topic}/{pages}/{start_page}")
+    pub.fetch(topic, pages=int(pages), start_page=int(start_page))
     return {"fetching": True, "reason": None, "target": topic}

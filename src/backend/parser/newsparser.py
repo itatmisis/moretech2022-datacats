@@ -164,6 +164,137 @@ class RiaParser:
         self.fetching = False
         return True
 
+
+class InvestingParser:
+    def __init__(self, logger, selenium_domain, selenium_port, db_creds: dict, tz: int = -3):
+        self.log = logger
+        self.protocol = "https"
+        self.site = "ru.investing.com"
+        # Connect to DB
+        self.db = DB(db_creds)
+        self.selenium_domain = selenium_domain
+        self.selenium_port = selenium_port
+        self.fetching = False
+        self.tz = tz
+
+    def is_fetching(self) -> bool:
+        return self.fetching
+
+    def fetch(self, topic: str, pages: int = 100, start_page: int = 1) -> bool:
+        # If already fetching, quit
+        if self.fetching:
+            return False
+        # Set the fetching flag
+        self.fetching = True
+
+        # Set up Selenium driver
+        selenff_options = webdriver.FirefoxOptions()
+        selenff_options.set_preference("http.response.timeout", 5)
+        selenff_options.set_preference("dom.max_script_run_time", 5)
+        drv = webdriver.Remote(f"http://{self.selenium_domain}:{self.selenium_port}/wd/hub", options=selenff_options)
+
+        # Load webpage `page` (iter)
+        for page in range(start_page, start_page + pages):
+            try:
+                if page == 1:
+                    drv.get(self.protocol + "://" + self.site + "/news/" + topic)
+                else:
+                    drv.get(self.protocol + "://" + self.site + "/news/" + topic + "/" + str(page))
+            except WebDriverException:
+                raise TimeoutError("Parser timed out")
+
+            # Get page HTML source from Selenium driver
+            html = drv.page_source
+
+            # Parse page source with beautifulsoup
+            soup = bs(html, features="html.parser")
+            # Find all article links
+            data = soup.findAll("a", {"class": "title"})
+
+            for index, news in enumerate(data):
+                # Parse every third index to reduce data volume
+                #! You are expected to remove articles from this source before re-fetching!
+                if index % 3 != 0:
+                    continue
+                news_link = news["href"]
+                rncontent = r.get(self.protocol + "://" + self.site + news_link)
+                ndata = bs(rncontent.text, features="html.parser")
+
+                # Collect title
+                try:
+                    title = ndata.find("h1", {"class": "articleHeader"}).text.strip()
+                except AttributeError:
+                    title = None
+
+                # Collect preamble
+                preamble = None
+
+                # Collect tldr
+                tldr = None
+
+                # Collect timestamp
+                timestamp = ndata.find("div", {"class": "contentSectionDetails"}).find("span").text.strip()
+                try:
+                    timestamp = datetime.strptime(timestamp, "%d.%m.%Y %H:%M")
+                except Exception as exc:
+                    try:
+                        timestamp = datetime.strptime(timestamp.split("(")[1][:-1], "%d.%m.%Y %H:%M")
+                    except IndexError:
+                        print(f"Index error on {timestamp}")
+                timestamp -= timedelta(hours=self.tz)
+
+                # Collect all paragraphs
+                paragraphs = []
+                paragraphs_raw = ndata.find("div", {"class": "WYSIWYG articlePage"})
+                first_paragraph_raw = paragraphs_raw.findAll(text=True, recursive=False)
+                first_paragraph = None
+                for paragraph in first_paragraph_raw:
+                    paragraph_strip = paragraph.strip()
+                    if paragraph_strip == "":
+                        continue
+                    first_paragraph = paragraph_strip
+                    break
+
+                paragraphs_raw = paragraphs_raw.findAll("p")
+                for paragraph in paragraphs_raw:
+                    par_text = paragraph.text
+                    if par_text is None:
+                        continue  # Do not include a paragraph if it's NoneType
+                    stripped_paragraph = par_text.strip()
+                    if stripped_paragraph == "":
+                        continue  # Skip empty paragraphs
+                    # Else, include the paragraph
+                    paragraphs.append(stripped_paragraph)
+
+                # Construct the article's body from paragraphs
+                if first_paragraph is not None:
+                    body = first_paragraph + "\n"
+                else:
+                    body = ""
+                for par in paragraphs:
+                    body += par + "\n"
+
+                # Construct the article's entry
+                article = {"source": "investing",
+                        "topic": topic,
+                        "title": title,
+                        "preamble": preamble,
+                        "tldr": tldr,
+                        "timestamp": timestamp,
+                        "body": body}
+                # Send article to db
+                self.db.add_article("investing-" + news_link.split("/")[-1], article)
+
+        # Close the Selenium session
+        try:
+            drv.quit()
+        except Exception as exc:
+            print("Selenium failed on quit(). It probably already closed the session (Docker).\nException: {exc}")
+
+        # Unset the fetching flag
+        self.fetching = False
+        return True
+
 class RBCParser:
     def __init__(self, logger, selenium_domain, selenium_port, db_creds, scroll_cooldown=0.7):
         self.log = logger
