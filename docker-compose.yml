@@ -85,6 +85,25 @@ services:
     depends_on:
       - db
 
+  neuralnet:
+    container_name: datacats-neuralnet
+    build:
+      context: ./src/neuralnet
+    image: moretech2022-datacats-neuralnet
+    restart: always
+    environment:
+      DATACATS_NN_DATASET_PATH: ${DATACATS_NN_DATASET_PATH}
+      DATACATS_NN_DESC_DIRECTOR_PATH: ${DATACATS_NN_DESC_DIRECTOR_PATH}
+      DATACATS_NN_DESC_ACCOUNTANT_PATH: ${DATACATS_NN_DESC_ACCOUNTANT_PATH}
+    volumes:
+      - ./docker/neuralnet:/data
+    ports:
+      - "23432:80"
+    networks:
+      - datacats-network
+    depends_on:
+      - backend-api
+
 networks:
   datacats-network:
     name: datacats-network

@@ -1,0 +1,10 @@
+numpy==1.23.3
+pandas==1.5.0
+matplotlib==3.6.1
+seaborn==0.12.0
+nltk==3.7
+sklearn
+gensim==4.2.0
+transformers==4.22.2
+torch==1.12.1
+pickle-mixin==1.0.2
