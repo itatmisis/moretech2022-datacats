@@ -141,7 +141,7 @@ class DB:
                 "timestamp": int(mktime(article[5].timetuple()))}
 
     def get_random_articles(self, source: str, topic: str, count: int):
-        random_articles_raw = self.session.execute(text(f"SELECT id, title, preamble, tldr, timestamp, body FROM articles WHERE source = {source} AND topic = {topic} ORDER BY random() LIMIT {str(count)};")).all()
+        random_articles_raw = self.session.execute(text(f"SELECT id, title, preamble, tldr, timestamp, body FROM articles WHERE source = '{source}' AND topic = '{topic}' ORDER BY random() LIMIT {str(count)};")).all()
         articles = {}
         for article in random_articles_raw:
             articles[article[0]] = {
