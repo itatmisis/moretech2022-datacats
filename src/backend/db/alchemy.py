@@ -148,7 +148,7 @@ class DB:
                 "title": article[1],
                 "preamble": article[2],
                 "tldr": article[3],
-                "timestamp": article[4],
+                "timestamp": int(mktime(article[4].timetuple())),
                 "body": article[5]
             }
         return articles
