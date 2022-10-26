@@ -140,6 +140,19 @@ class DB:
                 "tldr": article_raw[4],
                 "timestamp": int(mktime(article[5].timetuple()))}
 
+    def get_random_articles(self, source: str, topic: str, count: int):
+        random_articles_raw = self.session.execute(text(f"SELECT id, title, preamble, tldr, timestamp, body FROM articles WHERE source = {source} AND topic = {topic} ORDER BY random() LIMIT {str(count)};")).all()
+        articles = {}
+        for article in random_articles_raw:
+            articles[article[0]] = {
+                "title": article[1],
+                "preamble": article[2],
+                "tldr": article[3],
+                "timestamp": article[4],
+                "body": article[5]
+            }
+        return articles
+
 if __name__ == "__main__":
     from os import getenv
     from dotenv import load_dotenv

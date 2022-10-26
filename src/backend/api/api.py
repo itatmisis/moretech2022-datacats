@@ -128,3 +128,8 @@ async def get_article_meta(article_id):
 async def get_article_body(article_id):
     log.debug(f"FastAPI: A user requested /article/{article_id}/body")
     return {"body": db.get_article_body(article_id)}
+
+@app.get("/random/articles/{source}/{topic}/{count}")
+async def get_random_articles(source, topic, count):
+    log.debug(f"A user requested /random/articles/{source}/{topic}/{count}")
+    return db.get_random_articles(source, topic, count)
